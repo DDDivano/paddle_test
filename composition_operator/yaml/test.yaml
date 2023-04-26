@@ -1,0 +1,78 @@
+abs_base:
+  desc: "求绝对值"
+  paddle:
+    api_name: "paddle.abs"
+    inputs:
+      x:
+        random: true
+        type: "Tensor"
+        dtype: "float32"
+        shape: [2, 32, 4, 999]
+        range: [ -1, 1]
+  pytorch:
+    api_name: "torch.abs"
+    mapping:
+      ins: { x: input }
+
+
+conv2d_1:
+  desc: "2维卷积"
+  paddle:
+    api_name: "paddle.nn.functional.conv2d"
+    inputs:
+      x:
+        random: true
+        type: "Tensor"
+        dtype: "float32"
+        shape: [2, 3, 10, 10]
+        range: [ -1, 1]
+    params:
+      weight:
+        random: true
+        type: "Tensor"
+        dtype: "float32"
+        shape: [1, 3, 2, 2]
+        range: [ -1, 1]
+      stride: 1
+      padding: 0
+  pytorch:
+    api_name: "torch.nn.functional.conv2d"
+    mapping:
+      ins: { x: input, weight: weight, stride: stride, padding: padding }
+
+
+add:
+  desc: "加法"
+  paddle:
+    api_name: "paddle.add"
+    inputs:
+      x:
+        random: true
+        type: "Tensor"
+        dtype: "float32"
+        shape: [ 2, 32, 4, 999 ]
+        range: [ -1, 1 ]
+      y:
+        random: true
+        type: "Tensor"
+        dtype: "float32"
+        shape: [ 2, 32, 4, 999 ]
+        range: [ -1, 1 ]
+  pytorch:
+    api_name: "torch.add"
+    mapping:
+      ins: { x: input, y: other }
+
+
+conv_pool:
+  model: "ConvPoolNet"
+  desc: "卷积池化网络"
+  paddle:
+    inputs:
+      x:
+        random: true
+        type: "Tensor"
+        dtype: "float32"
+        shape: [ 1, 3, 32, 32]
+        range: [ -1, 1 ]
+
