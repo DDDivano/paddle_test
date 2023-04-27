@@ -10,8 +10,8 @@ import numpy as np
 from inspect import isclass
 from paddle import to_tensor
 import paddle
-import framework.composition_operator.nets.torch_nets_lib as torch_net
-import framework.composition_operator.nets.paddle_nets_lib as paddle_net
+import composition_operator.nets.torch_nets_lib as torch_net
+import composition_operator.nets.paddle_nets_lib as paddle_net
 from copy import deepcopy
 
 class Paddle_Net(object):

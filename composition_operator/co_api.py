@@ -11,10 +11,10 @@ from wk.logger import Logger
 from wk.weaktrans import WeakTrans
 from wk.yaml_loader import YamlLoader
 from reader import Reader
-from framework.composition_operator.r.paddle_api import Paddle_Api
-from framework.composition_operator.r.torch_api import Torch_Api
-from framework.composition_operator.r.paddle_api_d2st import Paddle_Api_D2ST
-from framework.composition_operator.r.paddle_api_prim import Paddle_Api_Prim
+from composition_operator.r.paddle_api import Paddle_Api
+from composition_operator.r.torch_api import Torch_Api
+from composition_operator.r.paddle_api_d2st import Paddle_Api_D2ST
+from composition_operator.r.paddle_api_prim import Paddle_Api_Prim
 from checker import Checker
 
 class CO_API(object):

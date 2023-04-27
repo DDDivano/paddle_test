@@ -8,7 +8,7 @@ import paddle.nn as nn
 import numpy as np
 import torch
 import paddle.nn.functional as F
-from framework.composition_operator.utils.generate import rand_array
+from composition_operator.utils.generate import rand_array
 
 
 class ConvPoolNet(nn.Layer):

@@ -3,7 +3,7 @@
 # @author DDDivano
 # encoding=utf-8 vi:ts=4:sw=4:expandtab:ft=python
 
-from framework.composition_operator.compare import Compare
+from composition_operator.compare import Compare
 import os
 import datetime
 

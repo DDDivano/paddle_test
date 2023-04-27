@@ -8,7 +8,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
-from framework.composition_operator.utils.generate import rand_array
+from composition_operator.utils.generate import rand_array
 
 
 class ConvPoolNet(nn.Module):
