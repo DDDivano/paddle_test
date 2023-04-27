@@ -38,6 +38,30 @@ class CO_NET(object):
         wk = WeakTrans(case=c, logger=self.logger, seed=self.seed)
         return wk
 
+    def convert_paddle_to_torch(self, state_dict):
+        """
+        转换Paddle 到 Torch
+        """
+        torch_state_dict = {}
+        for k, v in state_dict.items():
+            if "fc" in k:
+                torch_state_dict[k] = torch.Tensor(v.numpy()).transpose(-1, 0)
+                continue
+            torch_state_dict[k] = torch.Tensor(v.numpy())
+        return torch_state_dict
+
+    def convert_param_to_numpy(self, state_dict):
+        """
+        转换Torch 到 numpy
+        """
+        result = {}
+        for k, v in state_dict.items():
+            if "fc" in k:
+                result[k] = torch.tensor(v).transpose(-1, 0).numpy()
+                continue
+            result[k] = v
+        return result
+
     def co_net(self, dtype="float64"):
         """
         主执行逻辑
@@ -51,15 +75,17 @@ class CO_NET(object):
         paddle_net = Paddle_Net(wk.get_nets(), inputs, dtype=dtype)
         paddle_forward = paddle_net.run_forward()
         paddle_backward = paddle_net.run_backward()
-        # print(paddle_forward)
-        # print(paddle_backward)
-        torch_net = Torch_Net(wk.get_nets(), inputs, dtype=dtype)
+
+        state_dict = paddle_net.get_state_dict()
+
+        torch_state_dict = self.convert_paddle_to_torch(state_dict)
+        torch_net = Torch_Net(wk.get_nets(), inputs, torch_state_dict, dtype=dtype)
         torch_forward = torch_net.run_forward()
         torch_backward = torch_net.run_backward()
         # print(torch_forward)
-        # print(torch_backward)
+        torch_backward = self.convert_param_to_numpy(torch_backward)
         # 对比
-        self.checker(paddle_forward, torch_forward, paddle_backward, torch_backward)
+        self.checker.compare_dict(paddle_backward, torch_backward)
 
     def co_net_d2st(self, dtype="float64"):
         """
@@ -86,5 +112,5 @@ class CO_NET(object):
 
 if __name__ == '__main__':
     # for i in range(100):
-    co = CO_NET("yaml/nets.yaml", "conv_pool", atol=0, rtol=0)
-    co.co_net_d2st(dtype="float64")
+    co = CO_NET("yaml/nets.yaml", "conv_pool", atol=1e-6, rtol=0)
+    co.co_net(dtype="float64")

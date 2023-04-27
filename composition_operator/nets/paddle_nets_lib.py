@@ -14,17 +14,26 @@ from framework.composition_operator.utils.generate import rand_array
 class ConvPoolNet(nn.Layer):
     def __init__(self, dtype):
         super(ConvPoolNet, self).__init__()
-        np.random.seed(33)
+        # 定义卷积层
+        self.conv1 = nn.Conv2D(in_channels=3, out_channels=32, kernel_size=3, stride=1, padding=1)
+        self.conv2 = nn.Conv2D(in_channels=32, out_channels=64, kernel_size=3, stride=1, padding=1)
+
+        # 定义池化层
         self.pool = nn.MaxPool2D(kernel_size=2, stride=2)
-        self.weight_np = rand_array(size=[32, 3, 3, 3], dtype=dtype)
-        self.bias_np = rand_array(size=[32], dtype=dtype)
-        self.weight = rand_array(size=[7200, 10], dtype=dtype)
-        self.bias = rand_array(size=[1], dtype=dtype)
+
+        # 定义全连接层
+        self.fc1 = nn.Linear(in_features=64 * 8 * 8, out_features=512)
+        self.fc2 = nn.Linear(in_features=512, out_features=10)
 
     def forward(self, x):
-        x = F.conv2d(x, weight=paddle.to_tensor(self.weight_np), bias=paddle.to_tensor(self.bias_np))
+        x = self.conv1(x)
+        x = nn.functional.relu(x)
+        x = self.pool(x)
+        x = self.conv2(x)
         x = nn.functional.relu(x)
         x = self.pool(x)
         x = paddle.flatten(x, start_axis=1, stop_axis=-1)
-        x = F.linear(x, weight=paddle.to_tensor(self.weight), bias=paddle.to_tensor(self.bias))
+        x = self.fc1(x)
+        x = nn.functional.relu(x)
+        x = self.fc2(x)
         return x

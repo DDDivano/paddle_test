@@ -12,9 +12,12 @@ from paddle import to_tensor
 import paddle
 import framework.composition_operator.nets.torch_nets_lib as torch_net
 import framework.composition_operator.nets.paddle_nets_lib as paddle_net
+from copy import deepcopy
 
 class Paddle_Net(object):
     def __init__(self, layer, inputs, dtype="float64"):
+        np.random.seed(33)
+        paddle.seed(33)
         if dtype == "float64":
             paddle.set_default_dtype(np.float64)
             self.dtype = np.float64
@@ -29,18 +32,30 @@ class Paddle_Net(object):
         self.layer = layer
         self.inputs = inputs
         self._set_paddle_param()
+        self.state_dict = deepcopy(self._state_dict())
 
+
+    def _state_dict(self):
+        layer = eval("paddle_net." + self.layer + "(np." + self.dtype.__name__ + ")")
+        return layer.state_dict()
+
+    def get_state_dict(self):
+        return self.state_dict
 
     def run_forward(self):
-        layer = eval("paddle_net." + self.layer + "(np." + self.dtype.__name__ + ")")
-        self.result = layer(self.inputs)
+        self.layer = eval("paddle_net." + self.layer + "(np." + self.dtype.__name__ + ")")
+        self.layer.load_dict(self.state_dict)
+        self.result = self.layer(self.inputs)
         return self.result.sum().numpy()[0]
 
     def run_backward(self):
-        grad = paddle.grad(self.result, self.inputs)
-        for i in range(len(grad)):
-            grad[i] = grad[i].numpy()
-        return np.array(grad)
+        loss = paddle.mean(self.result)
+        loss.backward()
+        result = {}
+        for name, param in self.layer.named_parameters():
+            result[name] = param.numpy()
+            result[name+"@grad"] = param.grad.numpy()
+        return result
 
     def _set_paddle_param(self):
         """

@@ -12,9 +12,10 @@ from torch import tensor
 import torch
 import framework.composition_operator.nets.torch_nets_lib as torch_net
 import framework.composition_operator.nets.paddle_nets_lib as paddle_net
+from copy import deepcopy
 
 class Torch_Net(object):
-    def __init__(self, layer, inputs, dtype="float64"):
+    def __init__(self, layer, inputs, state_dict, dtype="float64"):
         if dtype == "float64":
             torch.set_default_tensor_type(torch.DoubleTensor)
             self.dtype = np.float64
@@ -29,19 +30,23 @@ class Torch_Net(object):
         self.layer = layer
         self.inputs = inputs
         self._set_param()
+        self.state_dict = deepcopy(state_dict)
 
 
     def run_forward(self):
-        layer = eval("torch_net." + self.layer + "(np." + self.dtype.__name__ + ")")
-        self.result = layer(self.inputs)
+        self.layer = eval("torch_net." + self.layer + "(np." + self.dtype.__name__ + ")")
+        self.layer.load_state_dict(self.state_dict)
+        self.result = self.layer(self.inputs)
         return self.result.sum().detach().numpy()
 
     def run_backward(self):
-        grad = torch.autograd.grad(self.result.sum(), self.inputs)
-        grad = list(grad)
-        for i in range(len(grad)):
-            grad[i] = grad[i].numpy()
-        return np.array(grad)
+        loss = torch.mean(self.result)
+        loss.backward()
+        result = {}
+        for name, param in self.layer.named_parameters():
+            result[name] = param.detach().numpy()
+            result[name + "@grad"] = param.grad.numpy()
+        return result
 
     def _set_param(self):
         """

@@ -131,11 +131,11 @@ class CO_API(object):
 
 
 if __name__ == '__main__':
-    # for i in range(100):
-    co = CO_API("yaml/test.yaml", "add")
-    co.co_api()
-    co.co_api_d2st()
-    co.co_api_prim()
+    for i in ["add", "conv2d_1", "abs_base"]:
+        co = CO_API("yaml/test.yaml", i)
+        co.co_api()
+        co.co_api_d2st()
+        co.co_api_prim()
     #
     # co = CO("yaml/test.yaml", "conv2d_1")
     # co.co_api()

@@ -21,6 +21,24 @@ class Checker(object):
         with open('result_{}_{}.txt'.format(os.getpid(), datetime.date.today()), 'a') as f:
             f.write('{}, {}\n'.format(case_name, info))
 
+    def compare_dict(self, dict1, dict2):
+        """
+        对比dict
+        """
+        if set(dict1.keys()) != set(dict2.keys()):
+            self.logger.error("The keys in dict1 and dict2 are different.")
+            raise ValueError("dict 包含的keys不完全相同")
+        for k, v in dict1.items():
+            try:
+                self.logger.info("开始校验参数{}...".format(k))
+                Compare(dict1[k], dict2[k], self.atol, self.rtol, self.mode)
+                self.logger.info("参数{}校验成功...ok".format(k))
+            except Exception as e:
+                self.logger.error(e)
+                self.logger.info("参数{}校验失败...fail".format(k))
+                self.record(self.case_name, "参数{}校验失败".format(k))
+
+
     def __call__(self, paddle_forward, torch_forward, paddle_backward, torch_backward):
         try:
             self.logger.info("开始前向校验...")

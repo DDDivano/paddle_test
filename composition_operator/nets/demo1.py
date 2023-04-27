@@ -41,13 +41,14 @@ class ConvPoolNet_Torch(tnn.Module):
         super(ConvPoolNet_Torch, self).__init__()
         # 定义池化层
         self.pool = tnn.MaxPool2d(kernel_size=2, stride=2)
+        self.weight = tnn.Parameter(torch.tensor(weight_np, requires_grad=True))
+        self.bias1 = tnn.Parameter(torch.tensor(bias_np, requires_grad=True))
 
     def forward(self, x):
-        x = TF.conv2d(x, weight=torch.tensor(weight_np), bias=torch.tensor(bias_np))
+        x = TF.conv2d(x, weight=self.weight, bias=self.bias1)
         x = tnn.functional.relu(x)
         x = self.pool(x)
         x = x.view(x.size(0), -1)
-        x = TF.linear(x, weight=torch.tensor(weight.transpose((1, 0))), bias=torch.tensor(bias))
         return x
 
 
@@ -73,6 +74,10 @@ if __name__ == '__main__':
     grad2 = list(grad2)
     for i in range(len(grad2)):
         grad2[i] = grad2[i].numpy()
+
+
+    for name, param in layer.named_parameters():
+        print(name, param.grad)
 
     from framework.composition_operator.compare import Compare
     Compare(np.array(grad1), np.array(grad2))
