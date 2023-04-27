@@ -91,7 +91,7 @@ class CO_NET(object):
         """
         主执行逻辑
         """
-        self.logger.info("【网络测试】 Paddle动态图 vs Torch动态图")
+        self.logger.info("【网络测试-动转静】 Paddle动转静 vs Torch动态图")
         # 获取case配置
         wk = self.case()
         reader = Reader(wk)
@@ -116,5 +116,5 @@ class CO_NET(object):
 if __name__ == '__main__':
     # for i in range(100):
     co = CO_NET("yaml/nets.yaml", "conv_pool", atol=1e-6, rtol=0)
-    # co.co_net(dtype="float64")
-    co.co_net_d2st(dtype="float64")
+    co.co_net(dtype="float32")
+    co.co_net_d2st(dtype="float32")
