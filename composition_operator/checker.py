@@ -21,14 +21,18 @@ class Checker(object):
         with open('result_{}_{}.txt'.format(os.getpid(), datetime.date.today()), 'a') as f:
             f.write('{}, {}\n'.format(case_name, info))
 
-    def compare_dict(self, dict1, dict2):
+    def compare_dict(self, dict1, dict2, mode="all"):
         """
         对比dict
         """
         if set(dict1.keys()) != set(dict2.keys()):
             self.logger.error("The keys in dict1 and dict2 are different.")
+            print(dict1.keys())
+            print(dict2.keys())
             raise ValueError("dict 包含的keys不完全相同")
         for k, v in dict1.items():
+            if "@grad" in k and mode == "forward": continue
+            if "@grad" not in k and mode == "backward": continue
             try:
                 self.logger.info("开始校验参数{}...".format(k))
                 Compare(dict1[k], dict2[k], self.atol, self.rtol, self.mode)

@@ -14,6 +14,7 @@ import paddle
 import torch
 from jelly.paddle_net import Paddle_Net
 from jelly.paddle_net_d2st import Paddle_Net_D2ST
+from jelly.paddle_net_prim import Paddle_Net_Prim
 from jelly.torch_net import Torch_Net
 from checker import Checker
 
@@ -47,6 +48,10 @@ class CO_NET(object):
             if "fc" in k:
                 torch_state_dict[k] = torch.Tensor(v.numpy()).transpose(-1, 0)
                 continue
+            if "bn" in k:
+                # 转换
+                torch_state_dict[k.replace("_mean", "running_mean").replace("_variance", "running_var")] = torch.Tensor(v.numpy())
+                continue
             torch_state_dict[k] = torch.Tensor(v.numpy())
         return torch_state_dict
 
@@ -58,6 +63,10 @@ class CO_NET(object):
         for k, v in state_dict.items():
             if "fc" in k:
                 result[k] = torch.tensor(v).transpose(-1, 0).numpy()
+                continue
+            if "bn" in k:
+                # 转换
+                result[k.replace("running_mean", "_mean").replace("running_var", "_variance")] = v
                 continue
             result[k] = v
         return result
@@ -103,7 +112,6 @@ class CO_NET(object):
 
 
         state_dict = paddle_net.get_state_dict()
-
         torch_state_dict = self.convert_paddle_to_torch(state_dict)
         torch_net = Torch_Net(wk.get_nets(), inputs, torch_state_dict, dtype=dtype)
         torch_forward = torch_net.run_forward()
@@ -113,8 +121,40 @@ class CO_NET(object):
         # 对比
         self.checker.compare_dict(paddle_backward, torch_backward)
 
+    def co_net_prim(self, dtype="float64"):
+        """
+        主执行逻辑
+        """
+        self.logger.info("【网络测试-动转静】 Paddle动转静 vs Torch动态图")
+        # 获取case配置
+        wk = self.case()
+        reader = Reader(wk)
+        inputs = reader.get_inputs()
+
+        paddle_net = Paddle_Net_Prim(wk.get_nets(), inputs, dtype=dtype)
+        paddle_forward = paddle_net.run_forward()
+        paddle_backward = paddle_net.run_backward()
+
+
+        state_dict = paddle_net.get_state_dict()
+        torch_state_dict = self.convert_paddle_to_torch(state_dict)
+        torch_net = Torch_Net(wk.get_nets(), inputs, torch_state_dict, dtype=dtype)
+        torch_forward = torch_net.run_forward()
+        torch_backward = torch_net.run_backward()
+        # print(torch_forward)
+        torch_backward = self.convert_param_to_numpy(torch_backward)
+        # 对比
+        self.checker.compare_dict(paddle_backward, torch_backward)
+
+
+
 if __name__ == '__main__':
     # for i in range(100):
-    co = CO_NET("yaml/nets.yaml", "conv_pool", atol=1e-6, rtol=0)
+    # co = CO_NET("yaml/nets.yaml", "conv_pool", atol=1e-6, rtol=0)
+    # co.co_net(dtype="float32")
+    # co.co_net_d2st(dtype="float32")
+    # co.co_net_prim(dtype="float32")
+    co = CO_NET("yaml/nets.yaml", "simplenet", atol=1e-6, rtol=0)
     co.co_net(dtype="float32")
     co.co_net_d2st(dtype="float32")
+    co.co_net_prim(dtype="float32")

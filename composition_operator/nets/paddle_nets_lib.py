@@ -12,7 +12,7 @@ from composition_operator.utils.generate import rand_array
 
 
 class ConvPoolNet(nn.Layer):
-    def __init__(self, dtype):
+    def __init__(self):
         super(ConvPoolNet, self).__init__()
         # 定义卷积层
         self.conv1 = nn.Conv2D(in_channels=3, out_channels=32, kernel_size=3, stride=1, padding=1)
@@ -36,4 +36,26 @@ class ConvPoolNet(nn.Layer):
         x = self.fc1(x)
         x = nn.functional.relu(x)
         x = self.fc2(x)
+        return x
+
+
+class SimpleNet(nn.Layer):
+    def __init__(self):
+        super(SimpleNet, self).__init__()
+
+        self.conv1 = nn.Conv2D(in_channels=3, out_channels=16, kernel_size=3, padding=1)
+        self.bn1 = nn.BatchNorm2D(num_features=16)
+        self.pool1 = nn.MaxPool2D(kernel_size=2, stride=2)
+
+        self.conv2 = nn.Conv2D(in_channels=16, out_channels=32, kernel_size=3, padding=1)
+        self.bn2 = nn.BatchNorm2D(num_features=32)
+        self.pool2 = nn.MaxPool2D(kernel_size=2, stride=2)
+
+        self.fc = nn.Linear(in_features=196 * 8, out_features=10)
+
+    def forward(self, x):
+        x = self.pool1(self.bn1(paddle.nn.functional.relu(self.conv1(x))))
+        x = self.pool2(self.bn2(paddle.nn.functional.relu(self.conv2(x))))
+        x = paddle.flatten(x, start_axis=1)
+        x = self.fc(x)
         return x

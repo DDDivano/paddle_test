@@ -34,7 +34,7 @@ class Torch_Net(object):
 
 
     def run_forward(self):
-        self.layer = eval("torch_net." + self.layer + "(np." + self.dtype.__name__ + ")")
+        self.layer = eval("torch_net." + self.layer + "()")
         self.layer.load_state_dict(self.state_dict)
         self.result = self.layer(self.inputs)
         return self.result.sum().detach().numpy()

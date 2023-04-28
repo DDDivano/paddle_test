@@ -13,8 +13,9 @@ import paddle
 import composition_operator.nets.torch_nets_lib as torch_net
 import composition_operator.nets.paddle_nets_lib as paddle_net
 from copy import deepcopy
+import os
 
-class Paddle_Net_D2ST(object):
+class Paddle_Net_Prim(object):
     def __init__(self, layer, inputs, dtype="float64"):
         np.random.seed(33)
         paddle.seed(33)
@@ -29,6 +30,7 @@ class Paddle_Net_D2ST(object):
             self.dtype = np.float16
         else:
             raise TypeError("输入数据类型错误")
+        os.environ["FLAGS_prim_all"] = "true"
         self.layer = layer
         self.inputs = inputs
         self._set_paddle_param()

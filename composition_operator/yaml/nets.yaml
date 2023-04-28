@@ -10,3 +10,15 @@ conv_pool:
         shape: [ 1, 3, 32, 32]
         range: [ -1, 1 ]
 
+simplenet:
+  model: "SimpleNet"
+  desc: "卷积池化BN网络"
+  paddle:
+    inputs:
+      x:
+        random: true
+        type: "Tensor"
+        dtype: "float32"
+        shape: [ 1, 3, 28, 28]
+        range: [ -1, 1 ]
+

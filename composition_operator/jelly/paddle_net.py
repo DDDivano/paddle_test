@@ -36,14 +36,14 @@ class Paddle_Net(object):
 
 
     def _state_dict(self):
-        layer = eval("paddle_net." + self.layer + "(np." + self.dtype.__name__ + ")")
+        layer = eval("paddle_net." + self.layer + "()")
         return layer.state_dict()
 
     def get_state_dict(self):
         return self.state_dict
 
     def run_forward(self):
-        self.layer = eval("paddle_net." + self.layer + "(np." + self.dtype.__name__ + ")")
+        self.layer = eval("paddle_net." + self.layer + "()")
         self.layer.load_dict(self.state_dict)
         self.result = self.layer(self.inputs)
         return self.result.sum().numpy()[0]
@@ -53,6 +53,8 @@ class Paddle_Net(object):
         loss.backward()
         result = {}
         for name, param in self.layer.named_parameters():
+            if param.grad is None:
+                continue
             result[name] = param.numpy()
             result[name+"@grad"] = param.grad.numpy()
         return result
