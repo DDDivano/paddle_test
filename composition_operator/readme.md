@@ -1,0 +1,10 @@
+# 组合算子测试工具
+## 工具结构
+* `jelly`核心网络测试模块类
+* `nets`核心网络集合
+* `r`算子测试模块入口
+* `utils`工具模块
+* `wk`基类weaktrans解析器，包括yaml解析，日志配置，参数数据生成
+* `yaml`测试case存放
+* `co_api.py`api测试入口
+* `co_net.py`net测试入口
