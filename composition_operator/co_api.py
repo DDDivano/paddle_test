@@ -131,7 +131,7 @@ class CO_API(object):
 
 
 if __name__ == '__main__':
-    for i in ["add", "conv2d_1", "abs_base"]:
+    for i in ["addmm_8"]:
         co = CO_API("yaml/test.yaml", i)
         co.co_api()
         co.co_api_d2st()

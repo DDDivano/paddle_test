@@ -18,7 +18,10 @@ class Compare(object):
             self.compare()
 
     def compare(self):
-        np.testing.assert_allclose(self.a, self.b, atol=self.atol, rtol=self.rtol)
-
+        if isinstance(self.a, list) and isinstance(self.b, list):
+            for i in range(len(self.a)):
+                np.testing.assert_allclose(self.a[i], self.b[i], atol=self.atol, rtol=self.rtol)
+        else:
+            np.testing.assert_allclose(self.a, self.b, atol=self.atol, rtol=self.rtol)
     def equal(self):
         np.testing.assert_equal(self.a, self.b)

@@ -45,11 +45,13 @@ class Torch_Api(object):
         return self.result.sum().detach().numpy()
 
     def run_backward(self):
+        if len(list(self.inputs.values())) == 0:
+            return 0
         grad = torch.autograd.grad(self.result.sum(), list(self.inputs.values()))
         grad = list(grad)
         for i in range(len(grad)):
             grad[i] = grad[i].numpy()
-        return np.array(grad)
+        return grad
 
     def _set_param(self):
         """

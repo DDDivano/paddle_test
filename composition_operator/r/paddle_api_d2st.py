@@ -45,10 +45,12 @@ class Paddle_Api_D2ST(object):
         return self.result.sum().numpy()[0]
 
     def run_backward(self):
+        if len(list(self.inputs.values())) == 0:
+            return 0
         grad = paddle.grad(self.result, list(self.inputs.values()))
         for i in range(len(grad)):
             grad[i] = grad[i].numpy()
-        return np.array(grad)
+        return grad
 
     def _set_paddle_param(self):
         """

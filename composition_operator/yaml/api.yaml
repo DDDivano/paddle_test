@@ -63,3 +63,13 @@ add:
     mapping:
       ins: { x: input, y: other }
 
+ones_base:
+  desc: "创建形状为 shape 、数据类型为 dtype 且值全为1的Tensor"
+  paddle:
+    api_name: "paddle.ones"
+    params:
+      shape: [2, 3, 4, 4]
+  pytorch:
+    api_name: "torch.ones"
+    mapping:
+      ins: { shape: size }
